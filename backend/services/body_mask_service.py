@@ -56,7 +56,6 @@ def create_clothing_mask(image_bytes: bytes) -> Optional[Image.Image]:
         return int(p.x * w), int(p.y * h)
 
     # Key landmarks for torso/clothing area
-    nose        = pt(LM.NOSE)
     l_shoulder  = pt(LM.LEFT_SHOULDER)
     r_shoulder  = pt(LM.RIGHT_SHOULDER)
     l_hip       = pt(LM.LEFT_HIP)
