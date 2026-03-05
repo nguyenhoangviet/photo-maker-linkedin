@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ------------------------------------------------------------------
+  # Backend: lint + syntax check
+  # (ML heavy deps like torch/diffusers are excluded from CI to keep
+  #  CI fast; they are installed locally at runtime)
+  # ------------------------------------------------------------------
+  backend:
+    name: Backend – Lint & Syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install lightweight deps only
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            fastapi==0.111.0 \
+            uvicorn[standard]==0.29.0 \
+            python-multipart==0.0.9 \
+            Pillow==10.3.0 \
+            numpy==1.26.4 \
+            opencv-python-headless==4.9.0.80 \
+            ruff
+
+      - name: Lint with ruff
+        working-directory: backend
+        run: ruff check . --ignore E501,F401
+
+      - name: Syntax-check all Python files
+        working-directory: backend
+        run: |
+          python -m py_compile main.py
+          python -m py_compile services/background_service.py
+          python -m py_compile services/body_mask_service.py
+          python -m py_compile services/generation_service.py
+          echo "All Python files pass syntax check."
+
+  # ------------------------------------------------------------------
+  # Frontend: install + build
+  # ------------------------------------------------------------------
+  frontend:
+    name: Frontend – Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7

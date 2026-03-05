@@ -1,0 +1,32 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+aiofiles==23.2.1
+
+# Image processing
+Pillow==10.3.0
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+
+# Background removal (U2Net, runs locally)
+rembg==2.0.56
+
+# Face detection + gender detection (runs locally)
+deepface==0.0.92
+tf-keras==2.16.0
+
+# Body pose / segmentation for clothing mask
+mediapipe==0.10.14
+
+# Local Stable Diffusion inpainting (no API key required)
+# NOTE: torch install depends on your hardware:
+#   CPU only    → pip install torch torchvision
+#   NVIDIA GPU  → see https://pytorch.org/get-started/locally/
+#   Apple M1/M2 → pip install torch torchvision  (MPS backend auto-detected)
+torch>=2.1.0
+torchvision>=0.16.0
+diffusers==0.27.2
+transformers==4.40.0
+accelerate==0.30.0
+safetensors>=0.4.0
