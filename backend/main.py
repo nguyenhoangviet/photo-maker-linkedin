@@ -1,4 +1,5 @@
 import io
+import os
 import base64
 import uuid
 from pathlib import Path
@@ -23,9 +24,17 @@ from services.generation_service import (
 
 app = FastAPI(title="LinkedIn Photo Maker", version="2.0.0")
 
+# ALLOWED_ORIGINS env var: comma-separated list of allowed frontend URLs.
+# Defaults to local dev origins.
+_raw_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173",
+)
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

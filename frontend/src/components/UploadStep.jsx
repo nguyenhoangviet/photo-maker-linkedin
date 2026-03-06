@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import axios from 'axios'
+import { API_BASE } from '../lib/api'
 
 export default function UploadStep({ onDone }) {
   const [dragging, setDragging] = useState(false)
@@ -22,7 +23,7 @@ export default function UploadStep({ onDone }) {
 
     setLoading(true)
     try {
-      const res = await axios.post('/api/analyze', formData, {
+      const res = await axios.post(`${API_BASE}/api/analyze`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       onDone(res.data)

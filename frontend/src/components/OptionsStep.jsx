@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { API_BASE } from '../lib/api'
 
 // Professional preset colors with hex
 const BG_PRESETS = [
@@ -87,7 +88,7 @@ export default function OptionsStep({ analysis, options, onDone, onBack }) {
     }
 
     try {
-      const res = await axios.post('/api/generate', formData)
+      const res = await axios.post(`${API_BASE}/api/generate`, formData)
       onDone(res.data)
     } catch (err) {
       setError(err.response?.data?.detail || 'Generation failed. Please try again.')

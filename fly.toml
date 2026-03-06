@@ -1,0 +1,37 @@
+app = "photo-maker-linkedin"
+primary_region = "sin"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+  build_target = ""
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 10
+    soft_limit = 5
+
+[[vm]]
+  # 4GB RAM needed: ~1GB rembg + ~1GB DeepFace + ~2GB SD model in memory
+  memory = "4gb"
+  cpu_kind = "shared"
+  cpus = 2
+
+[env]
+  PORT = "8000"
+  # Set ALLOWED_ORIGINS via: fly secrets set ALLOWED_ORIGINS=https://your-app.vercel.app
+
+[[mounts]]
+  source = "model_cache"
+  destination = "/root/.cache/huggingface"
+  initial_size = "10gb"
+
+[[mounts]]
+  source = "rembg_cache"
+  destination = "/root/.u2net"
+  initial_size = "1gb"

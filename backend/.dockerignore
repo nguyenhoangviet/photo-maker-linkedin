@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Runtime data (generated at runtime)
+uploads/
+outputs/
+
+# Environment
+.env
+
+# Dev artifacts
+*.egg-info/
+dist/
+build/
+.pytest_cache/

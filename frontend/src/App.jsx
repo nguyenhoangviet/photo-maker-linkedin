@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { API_BASE } from './lib/api'
 import UploadStep from './components/UploadStep'
 import OptionsStep from './components/OptionsStep'
 import ResultStep from './components/ResultStep'
@@ -14,7 +15,7 @@ export default function App() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/options')
+    axios.get(`${API_BASE}/api/options`)
       .then(r => setOptions(r.data))
       .catch(() => {})
   }, [])
