@@ -153,6 +153,7 @@ async def analyze_image(file: UploadFile = File(...)):
         "gender":            gender_result["gender"],
         "gender_confidence": gender_result["confidence"],
         "preview":           image_to_base64(normalized),
+        "image_b64":         image_to_base64(normalized),
         "sd_available":      is_sd_available(),
         "outfits": {
             "male":   get_outfit_options("male"),
@@ -163,23 +164,21 @@ async def analyze_image(file: UploadFile = File(...)):
 
 @app.post("/api/generate")
 async def generate_photo(
-    session_id:     str           = Form(...),
-    gender:         str           = Form(...),
-    background_color: str         = Form("classic_gray"),
-    custom_color_r: Optional[int] = Form(None),
-    custom_color_g: Optional[int] = Form(None),
-    custom_color_b: Optional[int] = Form(None),
-    outfit_style:   str           = Form("business_suit"),
-    change_outfit:  bool          = Form(False),
+    gender:           str           = Form(...),
+    background_color: str           = Form("classic_gray"),
+    custom_color_r:   Optional[int] = Form(None),
+    custom_color_g:   Optional[int] = Form(None),
+    custom_color_b:   Optional[int] = Form(None),
+    outfit_style:     str           = Form("business_suit"),
+    change_outfit:    bool          = Form(False),
+    # Accept either session_id (local) or image_b64 (Vercel stateless)
+    session_id:       Optional[str] = Form(None),
+    image_b64:        Optional[str] = Form(None),
 ):
     """
-    Step 2: Generate the professional LinkedIn photo.
-    Pipeline:
-      1. [optional] Local SD inpainting → change outfit
-      2. rembg          → remove background
-      3. Pillow         → apply chosen background color
-      4. Output 800×800 JPEG
-    Everything runs locally — no external API calls.
+    Generate the professional LinkedIn photo.
+    Accepts either session_id (local file) or image_b64 (stateless/Vercel).
+    Pipeline: SD inpainting (opt.) → rembg → solid background → 800×800 JPEG
     """
     if gender not in ("male", "female"):
         raise HTTPException(status_code=400, detail="Gender must be 'male' or 'female'.")
@@ -189,11 +188,21 @@ async def generate_photo(
     ):
         background_color = "classic_gray"
 
-    session_path = UPLOAD_DIR / f"{session_id}.jpg"
-    if not session_path.exists():
-        raise HTTPException(status_code=404, detail="Session expired. Please upload again.")
-
-    image_bytes = session_path.read_bytes()
+    # Resolve image bytes from session file or base64 payload
+    if image_b64:
+        try:
+            import base64 as _b64
+            data = image_b64.split(",", 1)[-1] if "," in image_b64 else image_b64
+            image_bytes = _b64.b64decode(data)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid image_b64 data.")
+    elif session_id:
+        session_path = UPLOAD_DIR / f"{session_id}.jpg"
+        if not session_path.exists():
+            raise HTTPException(status_code=404, detail="Session expired. Please upload again.")
+        image_bytes = session_path.read_bytes()
+    else:
+        raise HTTPException(status_code=400, detail="Provide either session_id or image_b64.")
     outfit_applied = False
 
     # --- Step 1: outfit change via local SD inpainting (optional) ---

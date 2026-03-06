@@ -72,7 +72,8 @@ export default function OptionsStep({ analysis, options, onDone, onBack }) {
     setLoading(true)
 
     const formData = new FormData()
-    formData.append('session_id', analysis.session_id)
+    // Stateless: send the image back as base64 (no session file on Vercel)
+    formData.append('image_b64', analysis.image_b64 || analysis.preview)
     formData.append('gender', gender)
     formData.append('outfit_style', outfit)
     formData.append('change_outfit', changeOutfit.toString())

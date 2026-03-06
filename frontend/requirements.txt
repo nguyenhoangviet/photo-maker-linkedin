@@ -1,0 +1,12 @@
+# Vercel serverless function dependencies
+# Stripped to fit within 250MB unzipped limit
+# No torch / deepface / mediapipe — those are local-only features
+
+fastapi==0.111.0
+mangum==0.17.0
+python-multipart==0.0.9
+Pillow==10.3.0
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+rembg==2.0.56
+onnxruntime==1.18.0
